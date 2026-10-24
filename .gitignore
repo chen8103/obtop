@@ -1,0 +1,29 @@
+.DS_Store
+
+# Build outputs
+/obtop
+/obtop-nocgo
+/obtop-amd64
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go caches
+.gocache/
+.gomodcache/
+
+# Isolated implementation worktrees
+.worktrees/
+
+# IDE/temp files
+*.swp
+*.swo
+
+# Local release tooling outputs
+/build/
+/dist/
+/obtop-linux-amd64
