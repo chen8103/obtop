@@ -1,0 +1,65 @@
+# GitLab 11.11-compatible syntax. Only protected, annotated vMAJOR.MINOR.PATCH
+# tags are publishable. Recovery is explicit and restricted to protected main.
+image: docker-registry.qiyi.virtual/library/golang:1.26-iqiyi-2
+
+stages:
+  - build
+  - publish
+
+variables:
+  GIT_DEPTH: "0"
+  GIT_STRATEGY: clone
+  GIT_TERMINAL_PROMPT: "0"
+
+verify_release_tools:
+  stage: build
+  only:
+    - branches
+  except:
+    variables:
+      - '$OBTOP_RELEASE_TAG'
+  script:
+    - python3 -B -m unittest discover -s scripts/tests -p 'test_*.py'
+    - make test vet race
+    - make build
+    - ./build/obtop version
+
+build_release:
+  stage: build
+  only:
+    refs:
+      - tags
+      - main
+    variables:
+      - '$CI_COMMIT_TAG =~ /^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/'
+      - '$OBTOP_RELEASE_TAG =~ /^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/'
+  script:
+    - sh scripts/ci-checkout-release.sh
+    - python3 -B -m unittest discover -s scripts/tests -p 'test_*.py'
+    - sh scripts/build.sh release --dry-run
+    - make release
+  artifacts:
+    name: "obtop-$CI_COMMIT_TAG-$CI_COMMIT_SHA"
+    paths:
+      - dist/
+    expire_in: 30 days
+
+publish_github_release:
+  stage: publish
+  only:
+    refs:
+      - tags
+      - main
+    variables:
+      - '$CI_COMMIT_TAG =~ /^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/'
+      - '$OBTOP_RELEASE_TAG =~ /^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/'
+  dependencies:
+    - build_release
+  script:
+    - mkdir -p build/release-control
+    - cp scripts/publish-release.py scripts/github-readme-downloads.md build/release-control/
+    - sh scripts/ci-checkout-release.sh
+    - sh scripts/install-release-gh.sh
+    - export PATH="$CI_PROJECT_DIR/build/release-tools:$PATH"
+    - python3 -B build/release-control/publish-release.py --source-dir "$CI_PROJECT_DIR" --tag "${CI_COMMIT_TAG:-$OBTOP_RELEASE_TAG}" --dry-run
+    - python3 -B build/release-control/publish-release.py --source-dir "$CI_PROJECT_DIR" --tag "${CI_COMMIT_TAG:-$OBTOP_RELEASE_TAG}"
