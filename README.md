@@ -34,7 +34,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o obtop ./cmd/obtop
 
 在当前 macOS 环境下，建议始终使用 `CGO_ENABLED=0` 构建，避免出现 `dyld: missing LC_UUID load command` 的运行时错误。
 
-## 版本与本地发版
+## 版本与下载安装
 
 ```bash
 make build                 # 开发构建：build/obtop，版本为 dev
@@ -46,42 +46,65 @@ make race                  # 本机需要支持 CGO/race 的工具链
 
 版本输出包含 Git commit、UTC 构建时间、Go 版本和目标平台。直接 `go build` 的版本为 `dev`，commit 和构建时间为 `unknown`。程序版本与 JSON 输出的 `schema_version` 独立管理，不改变现有 SDK 接口。
 
-首期版本为 **v0.1.0**，属于试用阶段，SDK 和 CLI 后续可能调整。正式发版先将功能及发版配置审核合入 `main`，核对远端与本地提交一致，再在干净工作区操作：
+当前发布版本为 **v0.1.2**，属于试用阶段，SDK 和 CLI 后续可能调整。可直接下载以下安装包使用；源码快照见 [v0.1.2 tag](https://github.com/chen8103/obtop/tree/v0.1.2)。
+
+### 下载与安装 v0.1.2
+
+[GitHub Release v0.1.2](https://github.com/chen8103/obtop/releases/tag/v0.1.2) 提供以下附件，无需安装 Go 即可使用：
+
+| 平台 | 安装包 |
+|---|---|
+| Linux amd64（x86-64） | [obtop_v0.1.2_linux_amd64.tar.gz](https://github.com/chen8103/obtop/releases/download/v0.1.2/obtop_v0.1.2_linux_amd64.tar.gz) |
+| macOS arm64（Apple Silicon） | [obtop_v0.1.2_darwin_arm64.tar.gz](https://github.com/chen8103/obtop/releases/download/v0.1.2/obtop_v0.1.2_darwin_arm64.tar.gz) |
+
+校验文件：[SHA256SUMS](https://github.com/chen8103/obtop/releases/download/v0.1.2/SHA256SUMS)。以下命令需要 `curl`、`tar`、`shasum`；每个平台只核对所下载安装包的校验记录，输出 `OK` 后才解压安装。命令在子 Shell 中执行，失败即停止，下载文件保留在创建的临时目录。
+
+Linux amd64：
 
 ```bash
-# 以下 tag 操作由发布负责人确认后执行；make release 不创建或推送 tag。
-git tag -a v0.1.0 -m 'obtop v0.1.0'
-sh scripts/build.sh release --dry-run
-make release
+(
+set -eu
+PACKAGE=obtop_v0.1.2_linux_amd64.tar.gz
+BASE_URL=https://github.com/chen8103/obtop/releases/download/v0.1.2
+DOWNLOAD_DIR=$(mktemp -d /tmp/obtop-install.XXXXXX)
+cd "$DOWNLOAD_DIR"
+curl -fL --connect-timeout 15 --max-time 120 -o "$PACKAGE" "$BASE_URL/$PACKAGE"
+curl -fL --connect-timeout 15 --max-time 120 -o SHA256SUMS "$BASE_URL/SHA256SUMS"
+awk -v name="$PACKAGE" '$2 == name || $2 == "./" name' SHA256SUMS | shasum -a 256 -c -
+mkdir -p "$HOME/.local/opt/obtop/v0.1.2"
+tar -xzf "$PACKAGE" -C "$HOME/.local/opt/obtop/v0.1.2"
+"$HOME/.local/opt/obtop/v0.1.2/obtop" version
+"$HOME/.local/opt/obtop/v0.1.2/obtop" --help
+)
 ```
 
-正式构建要求 HEAD 上恰好一个 annotated tag，格式为 `vMAJOR.MINOR.PATCH`，且没有未提交或未跟踪的源码。执行前检查所在提交属于审核后的 `main`；脚本也允许在该 tag 的 detached HEAD 上构建。已有同版本产物时拒绝覆盖。
-
-`make release` 顺序执行测试、vet、race、SDK 示例编译，再以 `CGO_ENABLED=0` 和 `-trimpath` 构建 Linux amd64、macOS arm64；全部成功才生成最终目录：
-
-```text
-dist/v0.1.0/
-  obtop_v0.1.0_linux_amd64.tar.gz
-  obtop_v0.1.0_darwin_arm64.tar.gz
-  SHA256SUMS
-```
-
-每个压缩包包含 `obtop`、`README.md`。需要 Go、Git、make、tar、shasum 及本机 race 所需的 C 工具链；可用 `make GO=/path/to/go release` 指定 Go。发版不改变 `go.mod` 的 Go 版本声明。
-
-下载对应平台安装包及 `SHA256SUMS` 后，先校验，再解压到用户可写的安装目录。以下以 Linux amd64 为例：
+macOS arm64：
 
 ```bash
-# 校验文件包含两个平台；仅下载单个平台时提取该包的校验记录。
-grep 'obtop_v0.1.0_linux_amd64.tar.gz$' SHA256SUMS | shasum -a 256 -c -
-mkdir -p "$HOME/.local/opt/obtop/v0.1.0"
-tar -xzf obtop_v0.1.0_linux_amd64.tar.gz -C "$HOME/.local/opt/obtop/v0.1.0"
-"$HOME/.local/opt/obtop/v0.1.0/obtop" version
-"$HOME/.local/opt/obtop/v0.1.0/obtop" --help
+(
+set -eu
+PACKAGE=obtop_v0.1.2_darwin_arm64.tar.gz
+BASE_URL=https://github.com/chen8103/obtop/releases/download/v0.1.2
+DOWNLOAD_DIR=$(mktemp -d /tmp/obtop-install.XXXXXX)
+cd "$DOWNLOAD_DIR"
+curl -fL --connect-timeout 15 --max-time 120 -o "$PACKAGE" "$BASE_URL/$PACKAGE"
+curl -fL --connect-timeout 15 --max-time 120 -o SHA256SUMS "$BASE_URL/SHA256SUMS"
+awk -v name="$PACKAGE" '$2 == name || $2 == "./" name' SHA256SUMS | shasum -a 256 -c -
+mkdir -p "$HOME/.local/opt/obtop/v0.1.2"
+tar -xzf "$PACKAGE" -C "$HOME/.local/opt/obtop/v0.1.2"
+"$HOME/.local/opt/obtop/v0.1.2/obtop" version
+"$HOME/.local/opt/obtop/v0.1.2/obtop" --help
+)
 ```
 
-macOS 使用 `darwin_arm64` 包替换上述包名。将选定版本的目录加入 PATH 即可；需要恢复旧版本时将 PATH 切回保留的旧目录。
+安装后在当前终端将该版本加入 PATH：
 
-发布负责人取得授权后，手动推送 `v0.1.0` tag，在 GitHub 创建同名 Release 并上传两个压缩包及 `SHA256SUMS`。发布说明记录该版本的 TUI、JSON/NDJSON CLI、Go SDK 能力、试用限制及实际验证平台。发布后核对远端 tag 的提交，并重新下载附件校验 SHA-256；交叉编译成功不等于 Linux 运行验证或 OceanBase 现场验证。SDK 消费者使用同一 `v0.1.0` tag 和原模块路径。
+```bash
+export PATH="$HOME/.local/opt/obtop/v0.1.2:$PATH"
+obtop version
+```
+
+如需长期使用，可将上述 `export PATH` 加入 Shell 配置文件。需要恢复旧版本时，将 PATH 切回保留的旧版本目录。
 
 `make clean` 仅删除本流程的 `build/` 和 `dist/`，不会删除仓库根目录已有的 obtop 二进制。清理前可运行 `sh scripts/build.sh clean --dry-run`，需要保留的安装包应先另存。
 
