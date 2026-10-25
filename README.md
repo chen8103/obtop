@@ -46,35 +46,37 @@ make race                  # 本机需要支持 CGO/race 的工具链
 
 版本输出包含 Git commit、UTC 构建时间、Go 版本和目标平台。直接 `go build` 的版本为 `dev`，commit 和构建时间为 `unknown`。程序版本与 JSON 输出的 `schema_version` 独立管理，不改变现有 SDK 接口。
 
-当前发布版本为 **v0.1.2**，属于试用阶段，SDK 和 CLI 后续可能调整。可直接下载以下安装包使用；源码快照见 [v0.1.2 tag](https://github.com/chen8103/obtop/tree/v0.1.2)。
+<!-- obtop-downloads:start -->
+<!-- obtop-downloads:version=v0.1.3 -->
+当前发布版本为 **v0.1.3**，属于试用阶段，SDK 和 CLI 后续可能调整。源码快照见 [v0.1.3 tag](https://github.com/chen8103/obtop/tree/v0.1.3)。
 
-### 下载与安装 v0.1.2
+### 下载与安装 v0.1.3
 
-[GitHub Release v0.1.2](https://github.com/chen8103/obtop/releases/tag/v0.1.2) 提供以下附件，无需安装 Go 即可使用：
+[GitHub Release v0.1.3](https://github.com/chen8103/obtop/releases/tag/v0.1.3) 提供以下附件，无需安装 Go 即可使用：
 
 | 平台 | 安装包 |
 |---|---|
-| Linux amd64（x86-64） | [obtop_v0.1.2_linux_amd64.tar.gz](https://github.com/chen8103/obtop/releases/download/v0.1.2/obtop_v0.1.2_linux_amd64.tar.gz) |
-| macOS arm64（Apple Silicon） | [obtop_v0.1.2_darwin_arm64.tar.gz](https://github.com/chen8103/obtop/releases/download/v0.1.2/obtop_v0.1.2_darwin_arm64.tar.gz) |
+| Linux amd64（x86-64） | [obtop_v0.1.3_linux_amd64.tar.gz](https://github.com/chen8103/obtop/releases/download/v0.1.3/obtop_v0.1.3_linux_amd64.tar.gz) |
+| macOS arm64（Apple Silicon） | [obtop_v0.1.3_darwin_arm64.tar.gz](https://github.com/chen8103/obtop/releases/download/v0.1.3/obtop_v0.1.3_darwin_arm64.tar.gz) |
 
-校验文件：[SHA256SUMS](https://github.com/chen8103/obtop/releases/download/v0.1.2/SHA256SUMS)。以下命令需要 `curl`、`tar`、`shasum`；每个平台只核对所下载安装包的校验记录，输出 `OK` 后才解压安装。命令在子 Shell 中执行，失败即停止，下载文件保留在创建的临时目录。
+校验文件：[SHA256SUMS](https://github.com/chen8103/obtop/releases/download/v0.1.3/SHA256SUMS)。以下命令需要 `curl`、`tar`、`shasum`；每个平台只核对所下载安装包的校验记录，输出 `OK` 后才解压安装。命令在子 Shell 中执行，失败即停止，下载文件保留在创建的临时目录。
 
 Linux amd64：
 
 ```bash
 (
 set -eu
-PACKAGE=obtop_v0.1.2_linux_amd64.tar.gz
-BASE_URL=https://github.com/chen8103/obtop/releases/download/v0.1.2
+PACKAGE=obtop_v0.1.3_linux_amd64.tar.gz
+BASE_URL=https://github.com/chen8103/obtop/releases/download/v0.1.3
 DOWNLOAD_DIR=$(mktemp -d /tmp/obtop-install.XXXXXX)
 cd "$DOWNLOAD_DIR"
 curl -fL --connect-timeout 15 --max-time 120 -o "$PACKAGE" "$BASE_URL/$PACKAGE"
 curl -fL --connect-timeout 15 --max-time 120 -o SHA256SUMS "$BASE_URL/SHA256SUMS"
 awk -v name="$PACKAGE" '$2 == name || $2 == "./" name' SHA256SUMS | shasum -a 256 -c -
-mkdir -p "$HOME/.local/opt/obtop/v0.1.2"
-tar -xzf "$PACKAGE" -C "$HOME/.local/opt/obtop/v0.1.2"
-"$HOME/.local/opt/obtop/v0.1.2/obtop" version
-"$HOME/.local/opt/obtop/v0.1.2/obtop" --help
+mkdir -p "$HOME/.local/opt/obtop/v0.1.3"
+tar -xzf "$PACKAGE" -C "$HOME/.local/opt/obtop/v0.1.3"
+"$HOME/.local/opt/obtop/v0.1.3/obtop" version
+"$HOME/.local/opt/obtop/v0.1.3/obtop" --help
 )
 ```
 
@@ -83,28 +85,29 @@ macOS arm64：
 ```bash
 (
 set -eu
-PACKAGE=obtop_v0.1.2_darwin_arm64.tar.gz
-BASE_URL=https://github.com/chen8103/obtop/releases/download/v0.1.2
+PACKAGE=obtop_v0.1.3_darwin_arm64.tar.gz
+BASE_URL=https://github.com/chen8103/obtop/releases/download/v0.1.3
 DOWNLOAD_DIR=$(mktemp -d /tmp/obtop-install.XXXXXX)
 cd "$DOWNLOAD_DIR"
 curl -fL --connect-timeout 15 --max-time 120 -o "$PACKAGE" "$BASE_URL/$PACKAGE"
 curl -fL --connect-timeout 15 --max-time 120 -o SHA256SUMS "$BASE_URL/SHA256SUMS"
 awk -v name="$PACKAGE" '$2 == name || $2 == "./" name' SHA256SUMS | shasum -a 256 -c -
-mkdir -p "$HOME/.local/opt/obtop/v0.1.2"
-tar -xzf "$PACKAGE" -C "$HOME/.local/opt/obtop/v0.1.2"
-"$HOME/.local/opt/obtop/v0.1.2/obtop" version
-"$HOME/.local/opt/obtop/v0.1.2/obtop" --help
+mkdir -p "$HOME/.local/opt/obtop/v0.1.3"
+tar -xzf "$PACKAGE" -C "$HOME/.local/opt/obtop/v0.1.3"
+"$HOME/.local/opt/obtop/v0.1.3/obtop" version
+"$HOME/.local/opt/obtop/v0.1.3/obtop" --help
 )
 ```
 
 安装后在当前终端将该版本加入 PATH：
 
 ```bash
-export PATH="$HOME/.local/opt/obtop/v0.1.2:$PATH"
+export PATH="$HOME/.local/opt/obtop/v0.1.3:$PATH"
 obtop version
 ```
 
 如需长期使用，可将上述 `export PATH` 加入 Shell 配置文件。需要恢复旧版本时，将 PATH 切回保留的旧版本目录。
+<!-- obtop-downloads:end -->
 
 `make clean` 仅删除本流程的 `build/` 和 `dist/`，不会删除仓库根目录已有的 obtop 二进制。清理前可运行 `sh scripts/build.sh clean --dry-run`，需要保留的安装包应先另存。
 
